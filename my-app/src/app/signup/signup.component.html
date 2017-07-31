@@ -1,0 +1,48 @@
+        	      <div class="sign-up-wrapper">
+                	<h4>COMPANY REGISTRATION<span><img src="assets/images/cross.png" alt="image" title="cross-icon"/></span></h4>
+                  <div class="form-group">
+                    <label >Company Name</label>
+                    <input type="text" class="form-control"  placeholder="Name" [(ngModel)]="Name" name="compaanyName">
+                  </div>
+                  
+                 <div class="form-group">
+                    <label >CIN</label>
+                    <input type="text" class="form-control"  placeholder="Legal Business Name" [(ngModel)]="LegalBNo" name="CIN">
+                  </div>
+                  <div class="form-group">
+                    <label >Tax Identification No</label>
+                    <input type="text" class="form-control"  name="TaxIdNo" [(ngModel)]="TaxIdNo" placeholder="Company_Name">
+                  </div>
+                  <div class="form-group">
+                    <label>Phone No</label>
+                    <input type="text" class="form-control"  name="phone" [(ngModel)]="phone" placeholder="Registration_Id">
+                  </div>
+                  <div class="form-group">
+                    <label>Official Email id</label>
+                    <input type="text" class="form-control"  name="email" [(ngModel)]="email" placeholder="Official_Email_id">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" class="form-control" id="exampleInputPassword1" name="password" [(ngModel)]="password1" placeholder="Password">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" class="form-control" id="exampleInputPassword1" [(ngModel)]="password2" placeholder="Password">
+                  </div>
+
+                  <div class="form-group">
+                    <label>Select User Type</label>
+                    <select (change)="onChange($event.target.value)">
+                      <option *ngFor="let u of User">{{u}}</option>
+                  </select>
+                  </div>
+                  
+                  <div class="form-group">
+                  <button class="btn btn-primary center-block text-uppercase" (click)="Signup()">Signup</button>
+                  </div>
+            </div>
+            <div>
+                <button class="btn btn-primary center-block text-uppercase" (click)="Login()">Login</button>
+            </div>

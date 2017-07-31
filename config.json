@@ -1,0 +1,18 @@
+{
+   "host":"localhost",
+   "port":"5000",
+   "jwt_expiretime": "36000",
+   "channelName":"mychannel",
+   "chaincodeName":"oilChain17",
+   "GOPATH":"../go",
+   "keyValueStore":"/tmp/fabric-client-kvs18",
+   "eventWaitTime":"30000",
+   "peers":["localhost:7051","localhost:8051","localhost:9051","localhost:10051","localhost:11051"],
+   "orderer":"grpcs://localhost:7050",
+   "users":[
+      {
+         "username":"admin",
+         "secret":"adminpw"
+      }
+   ]
+}
