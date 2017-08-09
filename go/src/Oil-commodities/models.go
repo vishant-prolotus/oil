@@ -103,23 +103,25 @@ type auditor struct {
 }
 
 type administrativeAgent struct {
-	Id    string `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Cases []Case `json:"Cases"`
-	Loans []loan `json:"loans"`
+	Id              string           `json:"id"`
+	Name            string           `json:"name"`
+	Email           string           `json:"email"`
+	HedgeAgreements []hedgeAgreement `json:"hedgeAgreements"`
+	Cases           []Case           `json:"Cases"`
+	Loans           []loan           `json:"loans"`
 }
 
 type loan struct {
-	LoanId          string          `json:"loanId"`
-	LoanCase        Case            `json:"loanCase"`
-	LoanAmount      float64         `json:"loanAmount"`
-	ApprovalDate    string          `json:"approvalDate"`
-	Term            float64         `json:"term"`
-	Lenders         []string        `json:"lenders"`
-	CreditAgreement creditAgreement `json:"creditAgreement"`
-	HedgeAgreement  hedgeAgreement  `json:"hedgeAgreement"`
-	Status          string          `json:"status"`
+	LoanId          string           `json:"loanId"`
+	LoanCase        Case             `json:"loanCase"`
+	LoanAmount      float64          `json:"loanAmount"`
+	ApprovalDate    string           `json:"approvalDate"`
+	Term            float64          `json:"term"`
+	Lenders         []string         `json:"lenders"`
+	CreditAgreement creditAgreement  `json:"creditAgreement"`
+	HedgeAgreements []hedgeAgreement `json:"hedgeAgreements"`
+	HedgeProposals  []hedgeAgreement `json:"hedgeProposals"`
+	Status          string           `json:"status"`
 }
 type creditAgreement struct {
 	LoanId          string  `json:"loanId"`
@@ -130,16 +132,23 @@ type creditAgreement struct {
 }
 
 type lender struct {
-	Id        string     `json:"id"`
-	Name      string     `json:"name"`
-	Email     string     `json:"email"`
-	Cases     []Case     `json:"Cases"`
-	Proposals []proposal `json:"proposals"`
-	Loans     []loan     `json:"loans"`
+	Id              string           `json:"id"`
+	Name            string           `json:"name"`
+	Email           string           `json:"email"`
+	Cases           []Case           `json:"Cases"`
+	Proposals       []proposal       `json:"proposals"`
+	Loans           []loan           `json:"loans"`
+	HedgeAgreements []hedgeAgreement `json:"hedgeAgreements"`
 }
 
 type hedgeAgreement struct {
-	Doc document `json:"doc"`
+	HedgeId      string   `json:"hedgeId"`
+	HedgerId     string   `json:"hedgerId"`
+	LoanId       string   `json:"loanId"`
+	Doc          document `json:"doc"`
+	BaseValue    float64  `json:"baseValue"`
+	MarkToMarket float64  `json:"markToMarket"`
+	Status       string   `json:"status"`
 }
 
 type hedgeRequest struct {

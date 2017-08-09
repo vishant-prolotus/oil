@@ -11,6 +11,7 @@ import (
 type Oilchain struct {
 }
 
+var loanStackKey = `loanStackKey`
 var borrowersKey = `borrowersKey`
 var casestack = `caseStack`
 
@@ -27,9 +28,13 @@ func (t *Oilchain) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	if len(args) != 0 {
 		return shim.Error(fmt.Sprintf("Wrong number of arguments"))
 	}
-	var loans []Case
-	loansAsbytes, _ := json.Marshal(loans)
-	err := stub.PutState(casestack, loansAsbytes)
+	var cases []Case
+	casesAsbytes, _ := json.Marshal(cases)
+	err := stub.PutState(casestack, casesAsbytes)
+
+	var loans []loan
+	loanAsbytes, _ := json.Marshal(loans)
+	err = stub.PutState(loanStackKey, loanAsbytes)
 	if err != nil {
 		return shim.Error(fmt.Sprintf("didnt put state"))
 	}
@@ -72,14 +77,16 @@ func (t *Oilchain) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.MakeCreditAgreement(stub, args)
 	} else if function == "updateReserveRep" {
 		return t.UpdateReserveRep(stub, args)
-	} else if function == "initHedger" {
-		return t.initHedger(stub, args)
+	} else if function == "addHedgeAgreementByLender" {
+		return t.AddHedgeAgreementByLender(stub, args)
 	} else if function == "read" {
 		return t.Read(stub, args)
-	} else if function == "requestHedging" {
-		return t.RequestHedging(stub, args)
-	} else if function == "AddHedgeAggreement" {
-		return t.AddHedgeAggreement(stub, args)
+	} else if function == "addHedgeAgreementByAdminAgent" {
+		return t.AddHedgeAgreementByAdminAgent(stub, args)
+	} else if function == "breakHedgeForAdmin" {
+		return t.BreakHedgeForAdmin(stub, args)
+	} else if function == "breakHedgeForLender" {
+		return t.BreakHedgeForLender(stub, args)
 	}
 
 	return shim.Error(fmt.Sprintf("No function called" + function))

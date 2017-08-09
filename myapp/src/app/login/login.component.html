@@ -1,0 +1,33 @@
+
+        	<div class="sign-up-wrapper login-container v-center">
+                	<h4>LOG IN<span data-dismiss="modal"><img src="images/cross.png" alt="image" title="cross-icon"/></span></h4>
+                  <div class="form-group">
+                    <label >User Name</label>
+                    <input type="text" placeholder="Name" [(ngModel)]="name">
+                  </div>
+                  
+                 <div class="form-group">
+                    <label >Password</label>
+                    <input type="password" placeholder="Password" [(ngModel)]="password">
+                  </div>
+
+                  <div class="form-group">
+                    <label >Organisation Name</label>
+                    <input type="text" placeholder="organization" [(ngModel)]="OrgName">
+                  </div>
+
+                  <div class="form-group">
+                    <label>Select User Type</label>
+                    <select (change)="onChange($event.target.value)">
+                      <option *ngFor="let u of User">{{u}}</option>
+                  </select>
+                  </div>
+                  
+                  <div class="form-group">
+                  <button class="btn btn-primary center-block text-uppercase" (click)="Login()">Submit</button>
+                  </div>
+
+                  <div class="form-group">
+                  <button class="btn btn-primary center-block text-uppercase" routerLink="/signup">Signup</button>
+                  </div>
+            </div>

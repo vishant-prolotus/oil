@@ -3,7 +3,7 @@
    "port":"5000",
    "jwt_expiretime": "36000",
    "channelName":"mychannel",
-   "chaincodeName":"oilChain17",
+   "chaincodeName":"oilChain19",
    "GOPATH":"../go",
    "keyValueStore":"/tmp/fabric-client-kvs18",
    "eventWaitTime":"30000",

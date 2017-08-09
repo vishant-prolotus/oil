@@ -113,6 +113,32 @@ func (t *Oilchain) AddComplianceCertificate(stub shim.ChaincodeStubInterface, ar
 		borrowerAcc.Cases[i].ComplianceCertificates = append(borrowerAcc.Cases[i].ComplianceCertificates, complianceCert)
 	}
 
+	for j := range borrowerAcc.Loans {
+		borrowerAcc.Loans[j].LoanCase.ComplianceCertificates = append(borrowerAcc.Loans[j].LoanCase.ComplianceCertificates, complianceCert)
+		adminAcc := administrativeAgent{}
+		adminAsBytes, _ := stub.GetState(borrowerAcc.Loans[j].LoanCase.AdministrativeAgentId)
+		_ = json.Unmarshal(adminAsBytes, &adminAcc)
+		for k := range adminAcc.Loans {
+			if adminAcc.Loans[k].LoanId == borrowerAcc.Loans[j].LoanId {
+				adminAcc.Loans[k].LoanCase.ComplianceCertificates = append(adminAcc.Loans[k].LoanCase.ComplianceCertificates, complianceCert)
+				for l := range adminAcc.Loans[k].Lenders {
+					lenderAcc := lender{}
+					lenderAsbytes, _ := stub.GetState(adminAcc.Loans[k].Lenders[l])
+					_ = json.Unmarshal(lenderAsbytes, &lenderAcc)
+					for m := range lenderAcc.Loans {
+						if lenderAcc.Loans[m].LoanId == adminAcc.Loans[k].LoanId {
+							lenderAcc.Loans[m].LoanCase.ComplianceCertificates = append(lenderAcc.Loans[m].LoanCase.ComplianceCertificates, complianceCert)
+						}
+					}
+					newLenderAsbytes, _ := json.Marshal(lenderAcc)
+					_ = stub.PutState(adminAcc.Loans[k].Lenders[l], newLenderAsbytes)
+				}
+			}
+		}
+		newAdminAsbytes, _ := json.Marshal(adminAcc)
+		_ = stub.PutState(borrowerAcc.Loans[j].LoanCase.AdministrativeAgentId, newAdminAsbytes)
+	}
+
 	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
 	err := stub.PutState(borrowerId, newBorrowerAsbytes)
 	if err != nil {

@@ -1,8 +1,10 @@
 'use strict';
 var log4js = require('log4js');
+	
 const mongodb = require('mongodb');
 var MongoClient = require('mongodb').MongoClient;
 var  co = require('co');
+var Utils = require('./utils');
 var test = require('assert');
 var logger = log4js.getLogger('SampleWebApp');
 var express = require('express');
@@ -13,42 +15,59 @@ var bodyParser = require('body-parser');
 var http = require('http');
 var util = require('util');
 var app = express();
+var registerRoutes = require('./register');
 var expressJWT = require('express-jwt');
 var jwt = require('jsonwebtoken');
 var bearerToken = require('express-bearer-token');
 var cors = require('cors');
 var config = require('./config.json');
 var helper = require('./app/helper.js');
-var Utils = require('./utils');
 var channels = require('./app/create-channel.js');
 var join = require('./app/join-channel.js');
 var install = require('./app/install-chaincode.js');
 var instantiate = require('./app/instantiate-chaincode.js');
 var invoke = require('./app/invoke-transaction.js');
 var query = require('./app/query.js');
-var registerModule = require('./register');
 var host = process.env.HOST || config.host;
 var port = process.env.PORT || config.port;
+///////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// SET CONFIGURATONS ////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 app.options('*', cors());
 app.use(cors());
+//support parsing of application/json type post data
 app.use(bodyParser.json());
+//support parsing of application/x-www-form-urlencoded post data
 app.use(bodyParser.urlencoded({
 	extended: false
 }));
-var busboy = require('connect-busboy');
-app.use(busboy()); 
-app.use(express.static(path.join(__dirname, 'public')));
+
+//////////////////////////////////////////////////////////////////////////////////////////
+/////////////////// sending front-end file //////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+
+app.use(express.static(path.join(__dirname, 'my-app/dist')));
+
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '/public/index.html'));
+  res.sendFile(path.resolve(__dirname+'/public/dist/index.html'));
 });
-app.use('/register',registerModule);
+
+app.use('/Register',registerRoutes);
+
 app.set('secret', 'thisismysecret');
+app.use(expressJWT({
+	secret: 'thisismysecret'
+}).unless({
+	path: ['/login']
+}));
+
+// Register and enroll user
 app.post('/login', function(req, res) {
-	var username = req.body.name;
-	var orgName = req.body.OrgName;
-	var passwrd = req.body.password;
-	var type = req.body.UserType;
+	var username = req.body.username;
+	var orgName = 'org1';
+	logger.debug('End point : /users');
+	logger.debug('User name : ' + username);
+	logger.debug('Org name  : ' + orgName);
 	if (!username) {
 		res.json(getErrorMessage('\'username\''));
 		return;
@@ -58,36 +77,28 @@ app.post('/login', function(req, res) {
 		return;
 	}
 	var token = jwt.sign({
-		exp: Math.floor(Date.now() / 1000) + parseInt(config.jwt_expiretime),
-		username: username,
-		orgName: orgName
-	}, app.get('secret'));
-	Utils.GetUser(username,orgName,passwrd,type).then(function(result,error){
-		if(error) return res.send(error);
-
-		helper.getRegisteredUsers(username, orgName, true).then(function(response) {
+					exp: Math.floor(Date.now() / 1000) + parseInt(config.jwt_expiretime),
+					username: username,
+					orgName: orgName
+				}, app.get('secret'));
+	helper.getRegisteredUsers(username, orgName, true).then(function(response) {
 			if (response && typeof response !== 'string') {
 				response.token = token;
-				return res.json({
-					success: true,
-					message: response,
-					mongod:result
-				}).send();
+				return res.json(response).send();
 			} else {
 				return res.json({
 					success: false,
-					message: response,
-					mongod:result
+					message: response
 				}).send();
 			}
 		});
-	})
 });
-app.use(expressJWT({
-	secret: 'thisismysecret'
-}));
+
 app.use(bearerToken());
 app.use(function(req, res, next) {
+	if (req.originalUrl.indexOf('/users') >= 0) {
+		return next();
+	}
 
 	var token = req.token;
 	jwt.verify(token, app.get('secret'), function(err, decoded) {
@@ -100,6 +111,8 @@ app.use(function(req, res, next) {
 			});
 			return;
 		} else {
+			// add the decoded user name and org name to the request object
+			// for the downstream code to use
 			req.username = decoded.username;
 			req.orgname = decoded.orgName;
 			logger.debug(util.format('Decoded from JWT token: username - %s, orgname - %s', decoded.username, decoded.orgName));
@@ -107,19 +120,16 @@ app.use(function(req, res, next) {
 		}
 	});
 });
-var apiRoutes=require('./router/api');
-app.use('/api',apiRoutes);
-//////////////////////////////// START SERVER /////////////////////////////////
-MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-	if(err) return console.log(err);
 
-    global.db = db;
-	var server = http.createServer(app).listen(8182, function() {});
-	logger.info('****************** SERVER STARTED ************************');
-	logger.info('**************  http://' + host + ':' + port +
-		'  ******************');
-	server.timeout = 240000;
-});
+///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////// START SERVER /////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+var server = http.createServer(app).listen(8181, function() {});
+logger.info('****************** SERVER STARTED ************************');
+logger.info('**************  http://' + host + ':' + port +
+	'  ******************');
+server.timeout = 240000;
+
 function getErrorMessage(field) {
 	var response = {
 		success: false,
@@ -128,9 +138,15 @@ function getErrorMessage(field) {
 	return response;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+/////////////////// api routes /////////////////////////////////////////////////
 
+var apiRoutes=require('./router/api');
+app.use('/api',apiRoutes);
+
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////// REST ENDPOINTS START HERE ///////////////////////////
-// Register and enroll user
+///////////////////////////////////////////////////////////////////////////////
 
 // Create Channel
 app.post('/channels', function(req, res) {
@@ -148,7 +164,7 @@ app.post('/channels', function(req, res) {
 		res.json(getErrorMessage('\'channelConfigPath\''));
 		return;
 	}
-
+	
 	channels.createChannel(channelName, channelConfigPath, req.username, req.orgname)
 	.then(function(message) {
 		res.send(message);

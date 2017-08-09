@@ -1,5 +1,6 @@
 package main
 
+/*
 import (
 	"encoding/json"
 	"fmt"
@@ -102,4 +103,4 @@ func (t *Oilchain) AddHedgeAggreement(stub shim.ChaincodeStubInterface, args []s
 
 	return shim.Success(nil)
 
-}
+}*/

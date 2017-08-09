@@ -63,7 +63,7 @@ func (t *Oilchain) AddFinancialStatement(stub shim.ChaincodeStubInterface, args 
 	financialrep.CreditPeriod, _ = strconv.Atoi(creditDays)
 	financialrep.Date = date
 	financialrep.LoanAmount, _ = strconv.ParseFloat(loanAmount, 64)
-	financialrep.Status = `pending`
+	financialrep.Status = `valid`
 	financialrep.BorrowerId = borrowerId
 
 	borrowerAcc := borrower{}
@@ -78,6 +78,36 @@ func (t *Oilchain) AddFinancialStatement(stub shim.ChaincodeStubInterface, args 
 
 	for z := range borrowerAcc.Cases {
 		borrowerAcc.Cases[z].FinancialReports = append(borrowerAcc.Cases[z].FinancialReports, financialrep)
+	}
+
+	for o := range borrowerAcc.Loans {
+		borrowerAcc.Loans[o].LoanCase.FinancialReports = append(borrowerAcc.Loans[o].LoanCase.FinancialReports, financialrep)
+		adminAcc := administrativeAgent{}
+		adminAsBytes, e := stub.GetState(borrowerAcc.Loans[o].LoanCase.AdministrativeAgentId)
+		if e != nil {
+			return shim.Error(fmt.Sprintf("C:couldnt read admin"))
+		}
+		_ = json.Unmarshal(adminAsBytes, &adminAcc)
+		for k := range adminAcc.Loans {
+			if adminAcc.Loans[k].LoanId == borrowerAcc.Loans[o].LoanId {
+				adminAcc.Loans[k].LoanCase.FinancialReports = append(adminAcc.Loans[k].LoanCase.FinancialReports, financialrep)
+				for a := range adminAcc.Loans[k].Lenders {
+					lenderAcc := lender{}
+					lenderAsbytes, _ := stub.GetState(adminAcc.Loans[k].Lenders[a])
+					_ = json.Unmarshal(lenderAsbytes, &lenderAcc)
+					for b := range lenderAcc.Loans {
+						if lenderAcc.Loans[b].LoanId == adminAcc.Loans[k].LoanId {
+							lenderAcc.Loans[b].LoanCase.FinancialReports = append(lenderAcc.Loans[b].LoanCase.FinancialReports, financialrep)
+						}
+					}
+					newLenderAsbytes, _ := json.Marshal(lenderAcc)
+					_ = stub.PutState(adminAcc.Loans[k].Lenders[a], newLenderAsbytes)
+				}
+
+			}
+		}
+		newAdminAsbytes, _ := json.Marshal(adminAcc)
+		_ = stub.PutState(borrowerAcc.Loans[o].LoanCase.AdministrativeAgentId, newAdminAsbytes)
 	}
 
 	newBorrowerAsbytes, _ := json.Marshal(borrowerAcc)
