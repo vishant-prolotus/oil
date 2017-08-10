@@ -66,7 +66,10 @@ options: DatePickerOptions;
     this.http.post('http://localhost:8182/api/makeReserveReport', formData, options)
     .map(res => res.json())
     .subscribe(
-        data => console.log('success'),
+        data => {
+          console.log('success')
+         window.location.reload(); 
+        },
         error => console.log(error)
     );
   }
@@ -97,7 +100,10 @@ options: DatePickerOptions;
     this.http.post('http://localhost:8182/api/updateReserveRep',formData, options)
     .map(res => res.json())
     .subscribe(
-        data => console.log('success'),
+        data => {
+          console.log('success')
+         window.location.reload(); 
+        },
         error => console.log(error)
     );
   }

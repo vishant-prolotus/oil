@@ -3,7 +3,9 @@ import { AuthService } from './auth.service';
 import { User } from './users/user';
 import { Router}  from '@angular/router';
 import { Subscription }   from 'rxjs/Subscription';
+import * as EventSource from 'eventsource';
 
+declare var toastr;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -44,6 +46,16 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    var evtSource = new EventSource('http://localhost:8182/notification/notify');
+    evtSource.onmessage = function(e) {
+        toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        showMethod: 'slideDown',
+        timeOut: 4000
+        };
+        toastr.success(e.data);
+    };
   }
 
   ngOnDestroy() {

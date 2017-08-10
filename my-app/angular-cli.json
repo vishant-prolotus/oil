@@ -48,6 +48,10 @@
       "style": false,
       "template": false
     },
+    "serve": {
+      "port": 4444,
+      "host": "localhost"
+    },
     "spec": {
       "class": false,
       "component": true,

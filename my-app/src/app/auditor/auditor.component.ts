@@ -64,7 +64,10 @@ loanAmount;
     this.http.post('http://localhost:8182/api/addFinancialStatement', formData, options)
     .map(res => res.json())
     .subscribe(
-        data => console.log('success'),
+        data => {
+          console.log('success')
+          window.location.reload();
+      },
         error => console.log(error)
     );
   }

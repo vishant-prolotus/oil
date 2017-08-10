@@ -33,6 +33,7 @@ export class FinancialStatementComponent implements OnInit {
     }
     this.request.post('http://localhost:8182/api/requestFinancialStatement',obj).subscribe((res:any)=>{
       console.log(res);
+      window.location.reload();
     },(err)=>{
       console.log(err);
     });

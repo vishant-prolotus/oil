@@ -31,7 +31,23 @@ router.post('/readData',function(req,res){
    var args=[];
     args.push(arg);
     query.queryChaincode('peer1', config.channelName, config.chaincodeName, args, 'read', req.username, req.orgname).then(function(message) {
-	    res.json(message).send();
+        io.on('connection',function(socket){
+            socket.on('commend added',function(data){
+                
+            });
+        });
+        // global.response.writeHead(200, {
+        //     'Content-Type': 'text/event-stream',
+        //     'Cache-Control': 'no-cache',
+        //     'Connection': 'keep-alive'
+        // });
+        // global.response.write("data: " + "dfgfghfhfhhhdhhrththrtrthtrgtgrthhthththrhrhrthrthrhtrth"+ "\n\n");
+        // global.response.end();
+
+        // global.request.on("close", function() {
+        //     console.log('closed eventsource');
+        // });
+        // res.json(message).send();
     });
 });
 
@@ -374,33 +390,101 @@ router.post('/breakHedgeForAdmin',function(req,res){
 });
 
  router.post('/addHedgeAgreementByAdminAgent',function(req,res){
-    var adminId=req.body.adminId;
-    var loanId=req.body.loanId;
-    var hedgeId=req.body.hedgeId;
-    var baseValue=req.body.baseValue;
-    var docId=req.body.docId;//hash
-    var docName='Doc';
-    var hedgers=req.body.hedgers;
-    var numOfHedgers=hedgers.length;
-    var args=[adminId,loanId,hedgeId,baseValue,docId,docName,numOfHedgers];
-    args.push(hedgers);
-    var fcn='addHedgeAgreementByAdminAgent';
-    invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
-        res.send(message);
+    var Value;
+    var fileData;
+    req.pipe(req.busboy);
+    req.busboy.on('field', function(key, value, keyTruncated, valueTruncated) {
+        Value=JSON.parse(value);
+    });
+    req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+        let chunks = [];
+        file.on('data', function(chunk) {
+            chunks.push(chunk);
+        });
+        file.on('end', function() {
+            fileData = Buffer.concat(chunks);
+            fileData = new mongo.Binary(fileData);
+        });
+    });
+    req.busboy.on('finish', function() {
+        let obj ={
+            date:new Date(),
+            adminId:Value.adminId,
+            loanId:Value.loanId,
+        }
+        var string = JSON.stringify(obj);
+        var hash = crypto.createHash('md5').update(string).digest('hex');
+        var adminId=Value.adminId;
+        var loanId=Value.loanId;
+        var hedgeId=hash;//hash
+        var baseValue=Value.baseValue;
+        var docId=hash;//hash
+        var docName='HedgeAgreementAdmin';
+        var hedgers=Value.hedgers;
+        var numOfHedgers=Value.hedgers.length;
+        var args=[adminId,loanId,hedgeId,baseValue,docId,docName,numOfHedgers];
+        args.push(hedgers);
+        var fcn='addHedgeAgreementByAdminAgent';
+        console.log(args);
+        invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
+            if(!message) return res.send('error');
+
+            var collection = global.db.collection('Files');
+            collection.insertOne({"_id":docId,"name":docName,"Docs":fileData}, function(err, response) {
+            if(err){
+                return res.send(err);
+            }
+                return res.json({
+                success: true,
+                message: message,
+                mongod:response
+                }).send();
+            });            
+        });
     });
 });
 
 router.post('/addHedgeAgreementByLender',function(req,res){
-    var lenderId=req.body.lenderId;
-    var hedgeId = crypto.createHash('md5').update(lenderId+Date.now()).digest('hex');
-    var loanId=req.body.loanId;
-    var baseVaule=req.body.baseValue;
-    var docId=req.body.docId
-    var docName=req.body.docName;
-    var args=[lenderId,hedgeId,loanId,baseVaule,documentId,docName];
-    var fcn='addHedgeAgreementByLender';
-    invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
-        res.send(message);
+    var Value;
+    var fileData;
+    req.pipe(req.busboy);
+    req.busboy.on('field', function(key, value, keyTruncated, valueTruncated) {
+        Value=JSON.parse(value);
+    });
+    req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+        let chunks = [];
+        file.on('data', function(chunk) {
+            chunks.push(chunk);
+        });
+        file.on('end', function() {
+            fileData = Buffer.concat(chunks);
+            fileData = new mongo.Binary(fileData);
+        });
+    });
+    req.busboy.on('finish', function() {
+        var hedgeId = crypto.createHash('md5').update(lenderId+Date.now()).digest('hex');
+        var lenderId=Value.lenderId;
+        var loanId=Value.loanId;
+        var baseValue=Value.baseValue;
+        var docId=hedgeId;//hash
+        var docName='HedgeAgreementLender';
+        var args=[lenderId,hedgeId,loanId,baseVaule,documentId,docName];
+        var fcn='addHedgeAgreementByLender';
+        invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
+            if(!message) return res.send('error');
+
+            var collection = global.db.collection('Files');
+            collection.insertOne({"_id":docId,"name":docName,"Docs":fileData}, function(err, response) {
+            if(err){
+                return res.send(err);
+            }
+                return res.json({
+                success: true,
+                message: message,
+                mongod:response
+                }).send();
+            });            
+        });
     });
 });
 

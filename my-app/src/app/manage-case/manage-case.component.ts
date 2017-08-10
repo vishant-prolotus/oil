@@ -59,7 +59,10 @@ export class ManageCaseComponent implements OnInit {
     this.http.post('http://localhost:8182/api/createCase', formData, options)
         .map(res => res.json())
         .subscribe(
-            data => console.log('success'),
+            data => {
+                console.log('success')
+             window.location.reload();   
+            },
             error => console.log(error)
         );
   }

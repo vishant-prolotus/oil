@@ -10,9 +10,11 @@ var path = require('path');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var http = require('http');
+// var http = require('http');
 var util = require('util');
 var app = express();
+var http    = require('http').Server(app);
+global.io = require('socket.io')(http);
 var expressJWT = require('express-jwt');
 var jwt = require('jsonwebtoken');
 var bearerToken = require('express-bearer-token');
@@ -39,6 +41,9 @@ app.use(bodyParser.urlencoded({
 var busboy = require('connect-busboy');
 app.use(busboy()); 
 app.use(express.static(path.join(__dirname, 'public')));
+global.response;
+global.request;
+app.use('/notification',registerModule);
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '/public/index.html'));
 });

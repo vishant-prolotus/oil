@@ -196,6 +196,7 @@
             </aside>
             <div class="content-wrapper">
                 <section class="content" style="margin-top:15px;">
+                    <button class="btn btn-success" (click)="notify(u)">notify</button>
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="panel panel-bd">
@@ -224,7 +225,7 @@
                               <td id="student-data2">{{u.borrowerName}}</td>
                               <td id="student-data1">{{u.amountRequested}}</td>
                               <td id="student-data3" class="text-center"><button class="btn btn-success" data-toggle="modal" data-target="#myModal-1">View</button>
-                              <button class="btn btn-success" (click)="ApprovePackage(u)">Approve</button>
+                              <button class="btn btn-success" (click)="UpdateLoanPackage(u)">Update Loan Package</button>
                               <button class="btn btn-success" data-toggle="modal" data-target="#myModal2" (click)="ModalData(u)">Make Loan Package</button>
     </td>
                             </tr>
