@@ -87,10 +87,38 @@ func (t *Oilchain) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.BreakHedgeForAdmin(stub, args)
 	} else if function == "breakHedgeForLender" {
 		return t.BreakHedgeForLender(stub, args)
+	} else if function == "getHistory" {
+		return t.GetHistory(stub, args)
 	}
 
 	return shim.Error(fmt.Sprintf("No function called" + function))
 
+}
+
+func (t *Oilchain) GetHistory(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	keysIter, err := stub.GetHistoryForKey(args[0])
+	if err != nil {
+		return shim.Error(fmt.Sprintf("query operation failed. Error accessing state: %s", err))
+	}
+	defer keysIter.Close()
+
+	var keys []string
+	for keysIter.HasNext() {
+		response, iterErr := keysIter.Next()
+		if iterErr != nil {
+			return shim.Error(fmt.Sprintf("query operation failed. Error accessing state: %s", err))
+		}
+		keys = append(keys, response.TxId)
+	}
+	for key, txID := range keys {
+		fmt.Printf("key %d contains %s\n", key, txID)
+	}
+
+	jsonKeys, err := json.Marshal(keys)
+	if err != nil {
+		return shim.Error(fmt.Sprintf("query operation failed. Error marshaling JSON: %s", err))
+	}
+	return shim.Success(jsonKeys)
 }
 
 // Query data

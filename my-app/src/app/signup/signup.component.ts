@@ -34,25 +34,8 @@ User=['Select_User_Type','Admin','Borrower','Lender','Auditor','Engineer'];
       password:this.password1,
     };
     this.request.post('http://localhost:8182/register',obj).subscribe((res:any)=>{
-      let result = JSON.parse(res._body);
-      localStorage.setItem("token", result.response.token);
-      switch(obj.UserType){
-        case "Lender":
-            this.router.navigate(['/lender']);
-            break;
-        case "Admin":
-            this.router.navigate(['/admin']);
-            break;
-        case "Auditor":
-            this.router.navigate(['/auditor']);
-            break;
-        case "Engineer":
-            this.router.navigate(['/engineer']);
-            break;
-        case "Borrower":
-            this.router.navigate(['/borrower']);
-            break;
-    }
+        console.log(res);
+    this.router.navigate(['/login']);
     },(err)=>{
       console.log(err);
     });

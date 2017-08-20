@@ -15,11 +15,6 @@ var config=require('./config.json');
 var peers=config.peers;
 
 
-router.get('/notify',function(req,res){
-    global.response=res;
-    global.request=req;
-});
-
 router.post('/',function(req,res){
     var type = req.body.UserType;
     switch(type){

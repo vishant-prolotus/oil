@@ -1,6 +1,8 @@
 var express = require('express');
 var app = express();
 var Utils = require('../utils');
+var fs = require('file-system');
+var _ = require('lodash');
 var router=express.Router();
 var invokeBorrower=require('../Chaincodecall-API/api.js');
 var invoke = require('../app/invoke-transaction.js');
@@ -17,6 +19,12 @@ var MongoClient = require('mongodb').MongoClient;
 var peers=config.peers;
 
 
+router.post('/getnotifications',function(req,res){
+	Utils.getNotifications(req.body.arg).then(function(response) {
+        return res.send(response);
+    })
+});
+
 router.post('/getInitData',function(req,res){
 	Utils.InitData().then(function(response) {
         return res.json({
@@ -27,27 +35,11 @@ router.post('/getInitData',function(req,res){
 });
 
 router.post('/readData',function(req,res){
-	var arg = req.body.arg;
-   var args=[];
+    var arg = req.body.arg;
+    var args=[];
     args.push(arg);
     query.queryChaincode('peer1', config.channelName, config.chaincodeName, args, 'read', req.username, req.orgname).then(function(message) {
-        io.on('connection',function(socket){
-            socket.on('commend added',function(data){
-                
-            });
-        });
-        // global.response.writeHead(200, {
-        //     'Content-Type': 'text/event-stream',
-        //     'Cache-Control': 'no-cache',
-        //     'Connection': 'keep-alive'
-        // });
-        // global.response.write("data: " + "dfgfghfhfhhhdhhrththrtrthtrgtgrthhthththrhrhrthrthrhtrth"+ "\n\n");
-        // global.response.end();
-
-        // global.request.on("close", function() {
-        //     console.log('closed eventsource');
-        // });
-        // res.json(message).send();
+        res.json(message).send();
     });
 });
 
@@ -96,12 +88,7 @@ router.post('/addFinancialStatement',function(req,res){
         var creditDays=Value.creditDays;//
         var date=JSON.stringify(Value.date);//
         var loanAmount=Value.loanAmount;//
-        var obj = {
-        auditorId:Value.auditorId,
-        date:JSON.stringify(Value.date)
-        };
-        var string = JSON.stringify(obj);
-        var hash = crypto.createHash('md5').update(string).digest('hex');
+        var hash = crypto.createHash('md5').update(Value.auditorId+Date.now()).digest('hex');
         var reportId=hash;//
         var args=[requestId,auditorId,reportId,creditDays,date,loanAmount];
         var collection = global.db.collection('Files');
@@ -143,12 +130,8 @@ router.post('/addComplianceCertificate',function(req,res){
         });
     });
     req.busboy.on('finish', function() {
-        var obj = {
-        borrowerId:Value.borrowerId,
-        date:JSON.stringify(Value.date)
-        };
-        var string = JSON.stringify(obj);
-        var hash = crypto.createHash('md5').update(string).digest('hex');
+        
+        var hash = crypto.createHash('md5').update(Value.borrowerId+Date.now()).digest('hex');
         var borrowerId=Value.borrowerId;
         var complianceRepId=hash;
         var date=JSON.stringify(Value.date);
@@ -196,12 +179,7 @@ router.post('/createCase',function(req,res){
     req.busboy.on('finish', function() {
         var Time = new Date();
         var value = JSON.parse(values[0]);
-        var obj = {
-        TimeStamp:Time,
-        id:value.borrowerId
-        };
-        var string = JSON.stringify(obj);
-        var hash = crypto.createHash('md5').update(string).digest('hex');
+        var hash = crypto.createHash('md5').update(value.borrowerId+Date.now()).digest('hex');
         var borrowerId=value.borrowerId;//borower id
         var CaseId=hash;//hash
         var amountRequested=value.amountRequested;
@@ -221,6 +199,7 @@ router.post('/createCase',function(req,res){
             args.push(docName);
             args.push(docId);
         }
+        console.log(args);
         
         var fcn='createCase';
         invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
@@ -275,13 +254,8 @@ router.post('/makeReserveReport',function(req,res){
         });
     });
     req.busboy.on('finish', function() {
-        var Time = new Date();
-        var obj = {
-        TimeStamp:Time,
-        id:Value.engineerId
-        };
-        var string = JSON.stringify(obj);
-        var hash = crypto.createHash('md5').update(string).digest('hex');
+        
+        var hash = crypto.createHash('md5').update(Value.engineerId+Date.now()).digest('hex');
         var engineerId=Value.engineerId;
         var reqId= Value.requestId;
         var reportId=hash;//doc id 
@@ -291,6 +265,7 @@ router.post('/makeReserveReport',function(req,res){
 
         var args=[engineerId,reqId,reportId,date,developed,undeveloped];
         var fcn='makeReserveReport';
+        console.log(args);
         invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
             if(!message) return res.send('error');
 
@@ -330,27 +305,28 @@ router.post('/makeProposals',function(req,res){
     var amount=req.body.amount;//
     var args=[lenderId,caseId,adminId,amount];
     var fcn='makeProposals';
+    console.log(args);
     invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
         res.send(message);
     });
 });
 
 router.post('/makeLoanPackage',function(req,res){
-    let obj={
-        date:req.body.approvalDate,
-        Id:req.body.adminId,
-    }
-    var string = JSON.stringify(obj);
-    var hash = crypto.createHash('md5').update(string).digest('hex');
+    
+    var hash = crypto.createHash('md5').update(req.body.adminId+Date.now()).digest('hex');
     var adminId=req.body.adminId;//
     var caseId=req.body.caseId;//
     var loanId=hash;//hash
     var approvalDate=JSON.stringify(req.body.approvalDate);//
     var term=req.body.term//
     var loanAmount=req.body.loanAmount;//
-    var numOfLenders=req.body.numOfLenders;//
     var lenders=req.body.lenders;//
-    var args=[adminId,caseId,loanId,approvalDate,term,loanAmount,numOfLenders,lenders];
+    var numOfLenders=lenders.length;//
+    var args=[adminId,caseId,loanId,approvalDate,term,loanAmount,JSON.stringify(numOfLenders)];
+    _.each(lenders,function(len) {
+        args.push(len);
+    });
+    console.log(args);
     var fcn='makeLoanPackage';
     invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
         res.send(message);
@@ -358,12 +334,8 @@ router.post('/makeLoanPackage',function(req,res){
 });
 
 router.post('/makeCreditAgreement',function(req,res){
-    let obj={
-        loan:req.body.loanId,
-        Id:req.body.adminId,
-    }
-    var string = JSON.stringify(obj);
-    var hash = crypto.createHash('md5').update(string).digest('hex');
+   
+    var hash = crypto.createHash('md5').update(req.body.loanId+Date.now()).digest('hex');
     var adminId=req.body.adminId;
     var creditId=hash;//hash
     var loanId=req.body.loanId;
@@ -379,12 +351,25 @@ router.post('/makeCreditAgreement',function(req,res){
 
 router.post('/breakHedgeForAdmin',function(req,res){
     var adminId=req.body.adminId;
-    var hedgeId=req.body.hedgeId;
+    var hedgeId=req.body.hedgeId;//hedgeagrements hedge id
     var markToMarket=req.body.markToMarket;
-    
     var args=[adminId,hedgeId,markToMarket];
     var fcn='breakHedgeForAdmin';
+    console.log(args);
     invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
+        Utils.BreakHedgeForAdmin(req.body.adminId,req.body.hedgeId,req);
+        res.send(message);
+    });
+});
+
+router.post('/breakHedgeForLender',function(req,res){
+    var lenderId=req.body.lenderId;
+    var hedgeId=req.body.hedgeId;
+    var markToMarket=req.body.markToMarket;
+    var args=[lenderId,hedgeId,markToMarket];
+    var fcn='breakHedgeForLender';
+    invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
+        Utils.BreakHedgeForLander(req);
         res.send(message);
     });
 });
@@ -407,23 +392,20 @@ router.post('/breakHedgeForAdmin',function(req,res){
         });
     });
     req.busboy.on('finish', function() {
-        let obj ={
-            date:new Date(),
-            adminId:Value.adminId,
-            loanId:Value.loanId,
-        }
-        var string = JSON.stringify(obj);
-        var hash = crypto.createHash('md5').update(string).digest('hex');
+        
+        var hash = crypto.createHash('md5').update(Value.loanId+Date.now()).digest('hex');
         var adminId=Value.adminId;
         var loanId=Value.loanId;
-        var hedgeId=hash;//hash
+        var hedgeId=hash;
         var baseValue=Value.baseValue;
-        var docId=hash;//hash
-        var docName='HedgeAgreementAdmin';
+        var docId=hash;
+        var docName='AdminHedgeAgreement';
         var hedgers=Value.hedgers;
         var numOfHedgers=Value.hedgers.length;
-        var args=[adminId,loanId,hedgeId,baseValue,docId,docName,numOfHedgers];
-        args.push(hedgers);
+        var args=[adminId,loanId,hedgeId,baseValue,docId,docName,JSON.stringify(numOfHedgers)];
+        _.each(hedgers,function(h) {
+            args.push(h);
+        });
         var fcn='addHedgeAgreementByAdminAgent';
         console.log(args);
         invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
@@ -462,19 +444,20 @@ router.post('/addHedgeAgreementByLender',function(req,res){
         });
     });
     req.busboy.on('finish', function() {
-        var hedgeId = crypto.createHash('md5').update(lenderId+Date.now()).digest('hex');
+        var hedgeId = crypto.createHash('md5').update(Value.lenderId+Date.now()).digest('hex');
         var lenderId=Value.lenderId;
         var loanId=Value.loanId;
         var baseValue=Value.baseValue;
-        var docId=hedgeId;//hash
+        var documentId=hedgeId;//hash
         var docName='HedgeAgreementLender';
-        var args=[lenderId,hedgeId,loanId,baseVaule,documentId,docName];
+        var args=[lenderId,hedgeId,loanId,baseValue,documentId,docName];
+        console.log(args);
         var fcn='addHedgeAgreementByLender';
         invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
             if(!message) return res.send('error');
 
             var collection = global.db.collection('Files');
-            collection.insertOne({"_id":docId,"name":docName,"Docs":fileData}, function(err, response) {
+            collection.insertOne({"_id":documentId,"name":docName,"Docs":fileData}, function(err, response) {
             if(err){
                 return res.send(err);
             }
@@ -506,12 +489,8 @@ router.post('/updateReserveRep',function(req,res){//engineer
         });
     });
     req.busboy.on('finish', function() {
-        let obj ={
-            date:JSON.stringify(Value.date),
-            engineerId:Value.engineerId
-        }
-        var string = JSON.stringify(obj);
-        var hash = crypto.createHash('md5').update(string).digest('hex');
+       
+        var hash = crypto.createHash('md5').update(Value.engineerId+Date.now()).digest('hex');
         var engineerId=Value.engineerId;
         var creditId=Value.creditId;
         var reportId=hash;//hash

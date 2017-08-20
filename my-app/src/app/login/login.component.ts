@@ -25,8 +25,7 @@ export class LoginComponent {
     let obj = {
       name:this.name,
       password:this.password,
-      OrgName:this.OrgName,
-      UserType:this.user
+      OrgName:'org1',
     }
     this.request.post('http://localhost:8182/login',obj).subscribe((res:any)=>{
       let result = JSON.parse(res._body);

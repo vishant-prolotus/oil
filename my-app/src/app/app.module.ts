@@ -19,6 +19,9 @@ import { FinancialStatementComponent } from './financial-statement/financial-sta
 import { LoginRouteGuardService } from './login-route-guard.service';
 import { RequestService } from './request.service';
 import { DatePickerModule } from 'ng2-datepicker';
+import { DateFilterPipe } from './date-filter.pipe';
+import { HedgeAgrementComponent } from './hedge-agrement/hedge-agrement.component';
+import { ViewLoanComponent } from './view-loan/view-loan.component';
 
 @NgModule({
   declarations: [
@@ -34,6 +37,9 @@ import { DatePickerModule } from 'ng2-datepicker';
     ManageCaseComponent,
     NewCaseComponent,
     FinancialStatementComponent,
+    DateFilterPipe,
+    HedgeAgrementComponent,
+    ViewLoanComponent,
   ],
   imports: [
     BrowserModule,

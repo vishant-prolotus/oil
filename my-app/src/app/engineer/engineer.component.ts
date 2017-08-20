@@ -16,7 +16,6 @@ file;
 modalData;
 Develop;
 CrediData;
-RequestId;
 Undevelop;
 date: DateModel;
 options: DatePickerOptions;
@@ -45,14 +44,14 @@ options: DatePickerOptions;
     this.file = files[0];
   }
 
-  Submit() {
+  AddFinancialStmnt() {
     let formData:FormData = new FormData();
     formData.append("file", this.file, this.file.name);
     let obj = {
       engineerId:this.engineerid._id,
       developed:this.Develop,
       undeveloped: this.Undevelop,
-      requestId:this.RequestId,
+      requestId:this.modalData.id,
       date:this.date,
     }
     var string = JSON.stringify(obj);
@@ -75,7 +74,6 @@ options: DatePickerOptions;
   }
 
   ModalData(u) {
-    this.RequestId = u.id;
     this.modalData = u;
   }
 

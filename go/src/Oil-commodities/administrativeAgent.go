@@ -146,6 +146,11 @@ func (t *Oilchain) MakeLoanPackage(stub shim.ChaincodeStubInterface, args []stri
 		lenderAsbytes, _ := stub.GetState(lenderId)
 		_ = json.Unmarshal(lenderAsbytes, &lenderAcc)
 		lenderAcc.Loans = append(lenderAcc.Loans, loanPack)
+		for t := range lenderAcc.Proposals {
+			if lenderAcc.Proposals[t].CaseId == caseId {
+				lenderAcc.Proposals[t].Status = `loanPack made`
+			}
+		}
 		newLenderAsbytes, _ := json.Marshal(lenderAcc)
 		e := stub.PutState(lenderId, newLenderAsbytes)
 		if e != nil {
@@ -194,6 +199,7 @@ func (t *Oilchain) MakeCreditAgreement(stub shim.ChaincodeStubInterface, args []
 
 		if adminAcc.Loans[i].LoanId == loanId {
 			adminAcc.Loans[i].CreditAgreement = credit
+			adminAcc.Loans[i].Status = `credit made`
 			borrowerId = adminAcc.Loans[i].LoanCase.BorrowerId
 			engineerId = adminAcc.Loans[i].LoanCase.EngineerId
 			lenders = adminAcc.Loans[i].Lenders
@@ -212,6 +218,7 @@ func (t *Oilchain) MakeCreditAgreement(stub shim.ChaincodeStubInterface, args []
 	for i := range borrowerAcc.Loans {
 		if borrowerAcc.Loans[i].LoanId == loanId {
 			borrowerAcc.Loans[i].CreditAgreement = credit
+			borrowerAcc.Loans[i].Status = `credit made`
 		}
 	}
 

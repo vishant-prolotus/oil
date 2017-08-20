@@ -180,11 +180,6 @@
                             <a routerLink="/engineer"><i class="ti-home"></i> <span>Dashboard</span>
                             </a>
                         </li>
-                        <li class="treeview">
-                            <a routerLink="/manage-case">
-                                <i class="fa fa-bug" aria-hidden="true"></i><span>Manage Reserve Report</span>
-                            </a>
-                        </li>
                     </ul>
                 </div> 
             </aside>
@@ -207,18 +202,16 @@
       <table class="table table-bordered">
                           <thead>
                             <tr>
-                              <th width="200">Date</th>
+                              <th width="200">Request Id</th>
                               <th data-toggle="modal" data-target="#myModal">Borrower Name</th>
-                              <th width="100"></th>
                               <th width="78"></th>
                             </tr>
                           </thead>
                           <tbody>
                             <tr class="active" *ngFor="let u of CaseData">
-                              <td id="student-data1">{{u.date}}</td>
-                              <td id="student-data2">{{u.borrowerId}}</td>
-                              <td id="student-data3"><button class="btn btn-success" data-toggle="modal" data-target="#myModal" (click)="ModalData(u)">Upload Report</button></td>
-                              
+                              <td id="student-data1" *ngIf="u.status!=='done'">{{u.id}}</td>
+                              <td id="student-data2" *ngIf="u.status!=='done'">{{u.borrowerId}}</td>
+                              <td id="student-data3" *ngIf="u.status!=='done'"><button class="btn btn-success" data-toggle="modal" data-target="#myModal" (click)="ModalData(u)">Upload Report</button></td>
                             </tr>
                           </tbody>
                         </table>
@@ -228,22 +221,16 @@
      <table class="table table-bordered">
                           <thead>
                             <tr>
-                              <th width="100">ID</th>
-                              <th width="100">Date</th>
+                              <th width="200">Request Id</th>
                               <th data-toggle="modal" data-target="#myModal">Borrower Name</th>
-                              <th>Developed Crude</th>
-                              <th>Undeveloped Crude</th>
                               <th width="78"></th>
                             </tr>
                           </thead>
                           <tbody>
-                            <tr class="active">
-                             <td id="student-data1"></td>
-                              <td id="student-data1"></td>
-                              <td id="student-data2"></td>
-                              <td id="student-data3"></td>
-                              <td id="student-data2">Column content</td>
-                              <td id="student-data3"><button class="btn btn-success">View</button></td>
+                            <tr class="active" *ngFor="let u of CaseData">
+                              <td id="student-data1" *ngIf="u.status=='done'">{{u.id}}</td>
+                              <td id="student-data2" *ngIf="u.status=='done'">{{u.borrowerId}}</td>
+                              <td id="student-data3" *ngIf="u.status=='done'"><button class="btn btn-success">view</button></td>
                             </tr>
                           </tbody>
                         </table>
@@ -305,7 +292,7 @@
                   <div class="form-group">
                       <input type="file" multiple="true" (change)="Fileevent($event)" >
                   </div>
-                  <button class="btn btn-success center-block" (click)="Submit()">Submit</button>
+                  <button class="btn btn-success center-block" (click)="AddFinancialStmnt()">Submit</button>
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

@@ -46,16 +46,16 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    var evtSource = new EventSource('http://localhost:8182/notification/notify');
-    evtSource.onmessage = function(e) {
-        toastr.options = {
-        closeButton: true,
-        progressBar: true,
-        showMethod: 'slideDown',
-        timeOut: 4000
-        };
-        toastr.success(e.data);
-    };
+    // var evtSource = new EventSource('http://localhost:8182/notification/notify');
+    // evtSource.onmessage = function(e) {
+    //     toastr.options = {
+    //     closeButton: true,
+    //     progressBar: true,
+    //     showMethod: 'slideDown',
+    //     timeOut: 4000
+    //     };
+    //     toastr.success(e.data);
+    // };
   }
 
   ngOnDestroy() {

@@ -1,0 +1,223 @@
+  <div class="wrapper">
+  <header class="main-header"> <a href="index.html" class="logo"> <!-- Logo --> 
+    <span class="logo-mini"> 
+    <img src="assets/dist/img/mini-logo.png" alt=""> </span> <span class="logo-lg"> 
+    <img src="assets/dist/img/logo.png" alt=""> </span> </a> 
+    <nav class="navbar navbar-static-top"> <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button"> <!-- Sidebar toggle button--> 
+      <span class="sr-only">Toggle navigation</span> <span class="pe-7s-keypad"></span> </a>
+      <div class="navbar-custom-menu">
+        <ul class="nav navbar-nav">
+          <li class="dropdown messages-menu"> <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <i class="pe-7s-mail"></i> <span class="label label-success">4</span> </a>
+            <ul class="dropdown-menu">
+              <li class="header">You have 4 messages</li>
+              <li>
+                <ul class="menu">
+                  <li><!-- start message --> 
+                    <a href="#">
+                    <div class="pull-left"><img src="assets/dist/img/avatar.png" class="img-circle" alt="User Image"></div>
+                    <h4>Support Team<small><i class="fa fa-clock-o"></i> 5 mins</small></h4>
+                    <p>Why not buy a new awesome theme?</p>
+                    </a> </li>
+                </ul>
+              </li>
+              <li class="footer"><a href="#">See All Messages</a></li>
+            </ul>
+          </li>
+          <!-- Notifications -->
+          <li class="dropdown notifications-menu"> <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <i class="pe-7s-speaker"></i> <span class="label label-warning">{{length}}</span> </a>
+            <ul class="dropdown-menu">
+              <li class="header">You have {{length}} notifications</li>
+              <li>
+                <ul class="menu" *ngFor="let u of NotificationData">
+                  <li><a href="#"><i class="ti-user color-gray"></i>{{u.message}} </a></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <!-- Tasks -->
+          <li class="dropdown tasks-menu"> <a href="#" class="dropdown-toggle" data-toggle="dropdown"> <i class="pe-7s-flag"></i> <span class="label label-danger">9</span> </a>
+            <ul class="dropdown-menu">
+              <li class="header">You have 9 tasks</li>
+              <li>
+                <ul class="menu">
+                  <li> <!-- Task item --> 
+                    <a href="#">
+                    <h3> Design some buttons <small class="pull-right">20%</small> </h3>
+                    <div class="progress">
+                      <div class="progress-bar progress-bar-primary progress-bar-striped active" role="progressbar" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100" style="width: 30%"> <span class="sr-only">30% Complete (primary)</span> </div>
+                    </div>
+                    </a> </li>
+                </ul>
+              </li>
+              <li class="footer"> <a href="#">View all tasks</a> </li>
+            </ul>
+          </li>
+          <li class="dropdown dropdown-user"> <a class="dropdown-toggle" data-toggle="dropdown"> <i class="pe-7s-settings"></i></a>
+            <ul class="dropdown-menu">
+              <li><a href="#"><i class="pe-7s-users"></i> User Profile</a></li>
+              <li><a href="#"><i class="pe-7s-settings"></i> Settings</a></li>
+              <li><a type="button" (click)="Logout()"><i class="pe-7s-key"></i> Logout</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+  <aside class="main-sidebar"> 
+    <div class="sidebar"> 
+      <div class="user-panel text-center">
+        <div class="image"> <img src="assets/dist/img/user2-160x160.png" class="img-circle" alt="User Image"> </div>
+        <div class="info">
+          <p>Borrower Name</p>
+          <a href="#"><i class="fa fa-circle text-success"></i> Online</a> </div>
+      </div>
+      <ul class="sidebar-menu">
+        <li class="header">MAIN NAVIGATION</li>
+        <li>
+            <a type="button" (click)="DashBoard()"><i class="ti-home"></i> <span>Dashboard</span>
+            </a>
+        </li>
+      </ul>
+    </div>
+  </aside>
+  <!--////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////-->
+  <div class="content-wrapper"> 
+    <section class="content" style="margin-top:15px;padding:0;min-height:100%;">
+      <div class="row"> 
+        <div class="col-sm-12">
+          <div class="panel panel-bd">
+            <div class="table-financial-report" style="padding:15px;">
+              <div class="container" style="width:100%;">
+                <h2>Manage Hedge Agreements</h2>
+                <ul class="nav nav-tabs enginr-tabs">
+                    <li class="active"><a data-toggle="tab" href="#home">Add Hedge Agreements</a></li>
+                    <li><a data-toggle="tab" href="#menu1">Hedge Agreements</a></li>
+                </ul>
+                <div class="tab-content tab-bg">
+                <!------------------------------------ CASE REQUEST ---------------->
+                <div id="home" class="tab-pane fade in active">
+                    <table class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <th width="200"># Loan ID</th>
+                          <th data-toggle="modal" data-target="#myModal">Loan Amount</th>
+                          <th>Case Status</th>
+                          <th width="78"></th>
+                        </tr>
+                      </thead>
+                      <tbody *ngIf="hedgeData">
+                          <tr class="active" *ngFor="let u of HedgeAgreements">
+                            <td id="student-data1">{{u.loanId}}</td>
+                            <td id="student-data2">{{u.loanAmount}}</td>
+                            <td id="student-data3">{{u.status}}</td>
+                            <td id="student-data3"><button class="btn btn-success" data-toggle="modal" data-target="#myModal1" (click)="ModalData(u,'add')">Add Hedge Agreement</button></td>
+                          </tr>
+                      </tbody>
+                    </table>
+                </div>
+                <!------------------------------------ CASE FORWARDED ---------------->
+                <div id="menu1" class="tab-pane fade">
+                    <table class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <th width="200"># Loan ID</th>
+                          <th data-toggle="modal" data-target="#myModal">Base Value</th>
+                          <th>Case Status</th>
+                          <th width="78"></th>
+                        </tr>
+                      </thead>
+                      <tbody *ngIf="hedgeData">
+                          <tr class="active" *ngFor="let u of HedgeData">
+                            <td id="student-data1">{{u.loanId}}</td>
+                            <td id="student-data2">{{u.baseValue}}</td>
+                            <td id="student-data3">{{u.status}}</td>
+                            <td id="student-data3"><button class="btn btn-success" data-toggle="modal" data-target="#myModal3" (click)="ModalData(u,'break')" *ngIf="u.status!=='discontinued'">Break Hedge Agreement</button></td>
+                          </tr>
+                      </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <footer class="main-footer">
+    <div class="pull-right hidden-xs"> <b>Version</b> 1.0</div>
+    <strong>Copyright &copy; 2016-2017 <a href="#">bdtask</a>.</strong> All rights reserved. <i class="fa fa-heart color-green"></i> </footer>
+    </div>
+    <!--///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////-->
+    <!---------------------------------------MODAL 1---------------------------------------------------------->
+<div class="modal fade" id="myModal1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Add Hedge Agreement</h4>
+        </div>
+        <div class="modal-body">
+            <div class="form-group" *ngIf="adminId.type=='Admin'">
+              <label>Hedge Proposals</label>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th width="150">Base Value</th>
+                        <th width="150">Status</th>
+                        <th width="150">Mark to Market</th>
+                        <th>Select/Deselect</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="active" *ngFor="let i of modalData">
+                        <td>{{i.baseValue}}</td>
+                        <td>{{i.status}}</td>
+                        <td>{{i.markToMarket}}</td>
+                        <input type="checkbox" name="options" value={{i.hedgeId}} (change)="HedgerSelect($event)" />
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-group">
+              <span>Select Document</span>
+              <div class="form-group">
+                  <input type="file" multiple="true" (change)="fileChange($event)" >
+              </div>
+            </div>
+            <div class="form-group">
+                <label>Base Value</label>
+                <input type="text" class="form-control" [(ngModel)]="BaseValue">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary center-block" (click)="AddHedgeAgreement()">Submit</button>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+<!--////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<div class="modal fade" id="myModal3" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Break Hedge Agreements</h4>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Mark To Market </label>
+                <input type="text" class="form-control" [(ngModel)]="markTomarket">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary center-block" (click)="BreakHedgeAgreement()">Submit</button>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>

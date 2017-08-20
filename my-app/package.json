@@ -23,6 +23,8 @@
     "@angular/router": "^3.4.7",
     "connect-busboy": "0.0.2",
     "core-js": "^2.4.1",
+    "file-system": "^2.2.2",
+    "lodash": "^4.17.4",
     "ng2-datepicker": "^1.8.3",
     "ng2-file-upload": "^1.2.1",
     "ng2-file-uploader": "^0.1.4",

@@ -13,6 +13,7 @@ export class AuditorComponent implements OnInit {
 file;
 date;
 data;
+financialReport;
 requestID;
 creditDays;
 auditorID;
@@ -25,11 +26,10 @@ loanAmount;
       arg:this.auditorID._id
     };
     this.request.post('http://localhost:8182/api/readData',obj).subscribe((res:any)=>{
-      this.data = JSON.parse(res._body);
-      this.data = JSON.parse(this.data);
+      this.data = JSON.parse(JSON.parse(res._body));
       console.log(this.data);
+      this.financialReport = this.data.financialReport;
       this.data = this.data.requests;
-      console.log(this.data);
     },(err)=>{
       console.log(err);
     });

@@ -1,7 +1,10 @@
 var crypto=require('crypto');
 const mongo = require('mongodb');
+var query = require('./app/query.js');
+var config=require('./config.json');
 var ObjectID   = require('mongodb').ObjectID;
 var MongoClient = require('mongodb').MongoClient;
+var _ = require('lodash');
 
 
 module.exports = {
@@ -15,7 +18,7 @@ module.exports = {
 
     SaveUser: function(ID,name,number,email,type,buisness_no,taxId_no,passwrd){
         return new Promise(function(resolve,reject){
-            var collection = global.db.collection(type);
+            var collection = global.db.collection('Users');
             collection.insertOne({"_id":ID,"User_name":name,"Contact_no":number,"Email":email
             ,"buisness_no":buisness_no,"tax_id":taxId_no,"password":passwrd,"type":type}, function(err, res) {
                 if(err){
@@ -26,9 +29,9 @@ module.exports = {
         });
     },
 
-    GetUser: function(username,orgName,passwrd,type){
+    GetUser: function(username,orgName,passwrd){
         return new Promise(function(resolve,reject){
-            var collection = global.db.collection(type);
+            var collection = global.db.collection('Users');
             collection.findOne({$and:[{"password":passwrd},{"User_name":username}]}, {fields:{User_name:1,type:1}},function(err, res) {
                 if(err){
                     reject(err);
@@ -37,53 +40,6 @@ module.exports = {
                 resolve(res);
             });
         });
-    },
-
-    SaveFiles: function(req,res){
-        let Docs = [];
-        var values = [];
-        req.pipe(req.busboy);
-        return new Promise(function(resolve,reject){
-            req.busboy.on('field', function(key, value, keyTruncated, valueTruncated) {
-                        values.push(value);
-                    });
-            req.busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-                let chunks = [];
-                file.on('data', function(chunk) {
-                    chunks.push(chunk);
-                });
-                file.on('end', function() {
-                    var fileData = Buffer.concat(chunks);
-                    fileData     = new mongo.Binary(fileData);
-                    Docs.push(fileData);
-                });
-            });
-            req.busboy.on('finish', function() {
-                var collection = global.db.collection('Cases');
-                collection.insertOne({"document":Docs,"value":values}, function(err, response) {
-                if(err){
-                    reject(err);
-                }
-                resolve(response);
-                });
-            });
-        });
-    },
-
-    DownloadFile: function(req,res) {
-        
-        global.db.collection('users').findOne({ _id: ObjectID("598058a0cddb705d5bd810a2")},{fields:{document:1}},function(err, doc) {
-        if (err) return res.send(err);
-        
-        res.writeHead(200, {'Content-Type': 'text/plain','Content-disposition':'attachment; filename=file.txt'});
-        for(var i=0;i<doc.document.length;i++)
-        {
-            var img = new Buffer(doc.document[i].buffer, 'base64');
-            res.write(img);
-        }
-        res.end();
-        });
-        
     },
 
     SaveFinancialRequest: function(bId,aId,rId) {
@@ -112,16 +68,17 @@ module.exports = {
 
     InitData: function() {
         return new Promise(function(resolve,reject){
-            var collection = global.db.collection('Auditor');
-            collection.find({}).toArray(function(Ae, Ar) {
-                var collection = global.db.collection('Admin');
-                collection.find({}).toArray(function(Ade, Adr) {
-                    var collection = global.db.collection('Engineer');
-                    collection.find({}).toArray(function(Ee, Er) {
-                        resolve({
+            var collection = global.db.collection('Users');
+            collection.find({"type":"Auditor"}).toArray(function(Ae, Ar) {
+                collection.find({"type":"Admin"}).toArray(function(Ade, Adr) {
+                    collection.find({"type":"Engineer"}).toArray(function(Ee, Er) {
+                        collection.find({"type":"Lender"}).toArray(function(Le, Lr) {
+                            resolve({
                             Auditor:Ar,
                             Admin:Adr,
-                            Engineer:Er
+                            Engineer:Er,
+                            Lender:Lr
+                            });
                         });
                     });
                 });
@@ -131,7 +88,7 @@ module.exports = {
 
     CheckUser: function(name,phone,email,type){
         return new Promise(function(resolve,reject){
-            var collection = global.db.collection(type);
+            var collection = global.db.collection('Users');
             collection.findOne({$or:[{"User_name":name},{"Contact_no":phone},{"Email":email}]}, {fields:{User_name:1,type:1}},function(err, res) {
                 if(err){
                     reject(err);
@@ -140,6 +97,119 @@ module.exports = {
             });
         });
     },
+    
+    BreakHedgeForAdmin: function(id,hid,req) {
+        var args=[];
+        args.push(id);
+        query.queryChaincode('peer1', config.channelName, config.chaincodeName, args, 'read', req.username, req.orgname).then(function(data) {
+            var temp = JSON.parse(data);
+            var abc = temp.hedgeAgreements;
+            var na=[];
+            var notify=[];
+            _.each(abc,function(obj) {
+                if(obj.hedgeId==hid){
+                    na.push(obj.loanId);
+                }
+            });
+            _.each(na,function(value) {
+                _.each(temp.loans,function(obj) {
+                    if(obj.loanId==value) {
+                        _.each(obj.lenders,function(id) {
+                            notify.push(id);
+                        });
+                        notify.push(obj.loanCase.borrowerId);
+                        _.each(obj.hedgeAgreements,function(ids) {
+                            var inc=0;
+                            _.each(notify,function(match) {
+                                if(ids.hedgerId==match) {
+                                    inc++;
+                                }
+                            });
+                            if(inc==0){
+                                notify.push(ids.hedgerId);
+                            }
+                        });
+                    }
+                });
+            });
+            var collection = global.db.collection('notifications');
+            _.each(notify,function(push) {
+                collection.insertOne({"_id":push,"Status":'Unseen',"message":"Admin breaked Hedge Agreement"}, function(err, response) {
+                if(err){
+                    console.log(err);
+                }
+                console.log(response);
+                });
+            });
+            console.log(notify);
+        });
+    },
 
+    BreakHedgeForLander: function(req) {
+        var lenderId=req.body.lenderId;
+        var hedgeId=req.body.hedgeId;
+        var args=[];
+        args.push(lenderId);
+        query.queryChaincode('peer1', config.channelName, config.chaincodeName, args, 'read', req.username, req.orgname).then(function(data) {
+            var temp = JSON.parse(data);
+            var abc = temp.hedgeAgreements;
+            var na=[];
+            var notify=[];
+            _.each(abc,function(obj) {
+                if(obj.hedgeId==hedgeId){
+                    na.push(obj.loanId);
+                }
+            });
+            _.each(na,function(value) {
+                _.each(temp.loans,function(obj) {
+                    if(obj.loanId==value) {
+                        _.each(obj.lenders,function(id) {
+                            notify.push(id);
+                        });
+                        notify.push(obj.loanCase.borrowerId);
+                        notify.push(obj.loanCase.administrativeAgentId);
+                        _.each(obj.hedgeAgreements,function(ids) {
+                            var inc=0;
+                            _.each(notify,function(match) {
+                                if(ids.hedgerId==match) {
+                                    inc++;
+                                }
+                            });
+                            if(inc==0){
+                                notify.push(ids.hedgerId);
+                            }
+                        });
+                    }
+                });
+            });
+            var collection = global.db.collection('notifications');
+            _.each(notify,function(push) {
+                collection.insertOne({"_id":push,"Status":'Unseen',"message":"Lender breaked Hedge Agreement"}, function(err, response) {
+                if(err){
+                    console.log(err);
+                }
+                console.log(response);
+                });
+            });
+            console.log(notify);
+        });
+    },
+
+    getNotifications: function(id) {
+        var collection = global.db.collection('notifications');
+        return new Promise(function(resolve,reject) {
+            collection.find({$and:[{"_id":id},{"Status":'Unseen'}]}).toArray(function(err, res) {
+            if(err) reject(err);
+
+            _.each(res,function(cs) {
+                collection.findAndModify({"_id":cs._id},[],{$set:{"Status":"seen"}}, function(error, result) {
+                   if(error) console.log(error);
+                   
+                    resolve(res);
+                });
+            }); 
+            });
+        });
+    }
 
 }

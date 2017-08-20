@@ -10,12 +10,23 @@ import { ManageCaseComponent } from './manage-case/manage-case.component';
 import { NewCaseComponent } from './new-case/new-case.component';
 import { FinancialStatementComponent } from './financial-statement/financial-statement.component';
 import { LoginRouteGuardService } from './login-route-guard.service';
+import { HedgeAgrementComponent } from './hedge-agrement/hedge-agrement.component'
+import { ViewLoanComponent } from './view-loan/view-loan.component'
 
 
 const routes: Routes = [
   {
     path: 'signup',
     component: SignupComponent
+  },
+  {
+    path: 'loanView',
+    component: ViewLoanComponent
+  },
+  {
+    path: 'hedgeAgreement',
+    component: HedgeAgrementComponent,
+    // canActivate: [LoginRouteGuardService]
   },
   {
     path: 'admin',

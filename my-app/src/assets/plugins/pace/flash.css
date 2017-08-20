@@ -10,6 +10,8 @@
     display: none;
 }
 
+.wrapper{ position: static !important;}
+
 .pace .pace-progress {
     background: #37a000;
     position: fixed;

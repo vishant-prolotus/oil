@@ -3,6 +3,7 @@ var log4js = require('log4js');
 const mongodb = require('mongodb');
 var MongoClient = require('mongodb').MongoClient;
 var  co = require('co');
+var fs = require('file-system');
 var test = require('assert');
 var logger = log4js.getLogger('SampleWebApp');
 var express = require('express');
@@ -10,11 +11,9 @@ var path = require('path');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-// var http = require('http');
+var http = require('http');
 var util = require('util');
 var app = express();
-var http    = require('http').Server(app);
-global.io = require('socket.io')(http);
 var expressJWT = require('express-jwt');
 var jwt = require('jsonwebtoken');
 var bearerToken = require('express-bearer-token');
@@ -41,9 +40,30 @@ app.use(bodyParser.urlencoded({
 var busboy = require('connect-busboy');
 app.use(busboy()); 
 app.use(express.static(path.join(__dirname, 'public')));
-global.response;
-global.request;
-app.use('/notification',registerModule);
+app.get('/downloadFile', (req, res) => {
+  global.db.collection('Files').findOne({ _id:req.param('cid')},{fields:{Docs:1}},function(err, doc) {
+        if (err) res.send(err);
+        
+		else{
+			if(doc==null){
+			res.send('no file');
+			return res.end();
+		}else{
+			if(doc.Docs==null){
+				res.send('no file');
+				return res.end();
+			}else{
+				var img = new Buffer(doc.Docs.buffer, 'base64');
+				res.setHeader("Content-Type","application/force-download");
+				res.setHeader("Content-Transfer-Encoding", "binary");
+				res.setHeader("Content-Disposition","attachment; filename=\"" + "Doc\"");
+				res.write(img, 'binary');
+				return res.end();
+			}
+			}
+		}
+    });
+});
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '/public/index.html'));
 });
@@ -53,7 +73,6 @@ app.post('/login', function(req, res) {
 	var username = req.body.name;
 	var orgName = req.body.OrgName;
 	var passwrd = req.body.password;
-	var type = req.body.UserType;
 	if (!username) {
 		res.json(getErrorMessage('\'username\''));
 		return;
@@ -67,7 +86,7 @@ app.post('/login', function(req, res) {
 		username: username,
 		orgName: orgName
 	}, app.get('secret'));
-	Utils.GetUser(username,orgName,passwrd,type).then(function(result,error){
+	Utils.GetUser(username,orgName,passwrd).then(function(result,error){
 		if(error) return res.send(error);
 
 		helper.getRegisteredUsers(username, orgName, true).then(function(response) {
@@ -119,7 +138,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 	if(err) return console.log(err);
 
     global.db = db;
-	var server = http.createServer(app).listen(8182, function() {});
+	var server = http.createServer(app).listen(port, function() {});
 	logger.info('****************** SERVER STARTED ************************');
 	logger.info('**************  http://' + host + ':' + port +
 		'  ******************');

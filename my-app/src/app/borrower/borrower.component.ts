@@ -15,6 +15,8 @@ borrowerId;
 modalData;
 file;
 date;
+length;
+NotificationData;
   constructor(private router: Router,public request:RequestService,public http: Http) { }
 
   ngOnInit() {
@@ -23,11 +25,15 @@ date;
       arg:this.borrowerId._id
     };
     this.request.post('http://localhost:8182/api/readData',obj).subscribe((res:any)=>{
-      this.CaseData = JSON.parse(res._body);
-      this.CaseData = JSON.parse(this.CaseData);
-      console.log(this.CaseData);
-      this.CaseData = this.CaseData.Cases;
-      console.log(this.CaseData);
+      console.log(JSON.parse(JSON.parse(res._body)));
+      let data = JSON.parse(JSON.parse(res._body));
+      this.CaseData = data.Cases;
+    },(err)=>{
+      console.log(err);
+    });
+    this.request.post('http://localhost:8182/api/getnotifications',obj).subscribe((res:any)=>{
+      this.NotificationData = JSON.parse(res._body);
+      this.length = this.NotificationData.length;
     },(err)=>{
       console.log(err);
     });
@@ -47,7 +53,7 @@ date;
     this.file = files[0];
   }
 
-  Upload() {
+  AddComplianceCert() {
       let formData:FormData = new FormData();
       formData.append("file", this.file, this.file.name);
     let obj={

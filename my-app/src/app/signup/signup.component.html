@@ -1,35 +1,36 @@
         	      <div class="sign-up-wrapper">
+                  <form>
                 	<h4>COMPANY REGISTRATION<span><img src="assets/images/cross.png" alt="image" title="cross-icon"/></span></h4>
                   <div class="form-group">
                     <label >Company Name</label>
-                    <input type="text" class="form-control"  placeholder="Name" [(ngModel)]="Name" name="compaanyName">
+                    <input type="text" class="form-control"   [(ngModel)]="Name" [ngModelOptions]="{standalone: true}">
                   </div>
                   
                  <div class="form-group">
                     <label >CIN</label>
-                    <input type="text" class="form-control"  placeholder="Legal Business Name" [(ngModel)]="LegalBNo" name="CIN">
+                    <input type="text" class="form-control"  [(ngModel)]="LegalBNo" [ngModelOptions]="{standalone: true}">
                   </div>
                   <div class="form-group">
                     <label >Tax Identification No</label>
-                    <input type="text" class="form-control"  name="TaxIdNo" [(ngModel)]="TaxIdNo" placeholder="Company_Name">
+                    <input type="text" class="form-control"   [(ngModel)]="TaxIdNo" [ngModelOptions]="{standalone: true}">
                   </div>
                   <div class="form-group">
                     <label>Phone No</label>
-                    <input type="text" class="form-control"  name="phone" [(ngModel)]="phone" placeholder="Registration_Id">
+                    <input type="text" class="form-control"  [(ngModel)]="phone" [ngModelOptions]="{standalone: true}">
                   </div>
                   <div class="form-group">
                     <label>Official Email id</label>
-                    <input type="text" class="form-control"  name="email" [(ngModel)]="email" placeholder="Official_Email_id">
+                    <input type="text" class="form-control" [(ngModel)]="email" [ngModelOptions]="{standalone: true}">
                   </div>
                   
                   <div class="form-group">
                     <label>Password</label>
-                    <input type="password" class="form-control" id="exampleInputPassword1" name="password" [(ngModel)]="password1" placeholder="Password">
+                    <input type="password" class="form-control"  [(ngModel)]="password1" [ngModelOptions]="{standalone: true}">
                   </div>
                   
                   <div class="form-group">
                     <label>Confirm Password</label>
-                    <input type="password" class="form-control" id="exampleInputPassword1" [(ngModel)]="password2" placeholder="Password">
+                    <input type="password" class="form-control"  [(ngModel)]="password2" [ngModelOptions]="{standalone: true}">
                   </div>
 
                   <div class="form-group">
@@ -42,6 +43,7 @@
                   <div class="form-group">
                   <button class="btn btn-primary center-block text-uppercase" (click)="Signup()">Signup</button>
                   </div>
+              </form>      
             </div>
             <div class="form-group">
               <button class="btn btn-primary center-block text-uppercase" routerLink="/login">Login</button>
