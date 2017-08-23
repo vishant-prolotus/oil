@@ -53,15 +53,17 @@ router.post('/requestFinancialStatement',function(req,res){
     invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
         if(!message) return res.send('error');
 
-        Utils.SaveFinancialRequest(borrowerId,auditorId,requestId).then(function(data,err){
-            if(err) return res.send(err);
-
+        var collection = global.db.collection('notifications');
+        collection.insertOne({"_id":auditorId,"Status":'Unseen',"message":"Borrower request Financial Statement"}, function(err, response) {
+            if(err){
+                return res.send(err);
+            }
             return res.json({
             success: true,
-            message: message,
-            mongodb:data
+            message: message
             }).send();
         });
+        
     });
 });
 
@@ -225,11 +227,17 @@ router.post('/createCase',function(req,res){
             if(err){
                 return res.send(err);
             }
+            var collection = global.db.collection('notifications');
+            collection.insertOne({"_id":requestTo,"Status":'Unseen',"message":"New Case Created By Borrower"}, function(err, response) {
+                if(err){
+                    return res.send(err);
+                }
                 return res.json({
                 success: true,
                 message: message,
                 mongod:response
                 }).send();
+            });
             });
         });
         
@@ -307,7 +315,19 @@ router.post('/makeProposals',function(req,res){
     var fcn='makeProposals';
     console.log(args);
     invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
-        res.send(message);
+        if(message){
+            var collection = global.db.collection('notifications');
+            collection.insertOne({"_id":adminId,"Status":'Unseen',"message":"Lender Make New Peoposal"}, function(err, response) {
+                if(err){
+                    return res.send(err);
+                }
+                return res.json({
+                success: true,
+                message: message,
+                mongod:response
+                }).send();
+            });
+        }
     });
 });
 
@@ -329,7 +349,21 @@ router.post('/makeLoanPackage',function(req,res){
     console.log(args);
     var fcn='makeLoanPackage';
     invoke.invokeChaincode(peers,config.channelName,config.chaincodeName,fcn,args,req.username,req.orgname).then(function(message){
-        res.send(message);
+        if(message) {
+            var collection = global.db.collection('notifications');
+            _.each(lenders,function(ln) {
+                collection.insertOne({"_id":ln,"Status":'Unseen',"message":"Admin Makes Loan Package"}, function(err, response) {
+                    if(err){
+                        return res.send(err);
+                    }
+                });
+            });
+            return res.json({
+            success: true,
+            message: message,
+            mongod:response
+            }).send();
+        }
     });
 });
 

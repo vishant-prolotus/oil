@@ -10,8 +10,8 @@ import { ManageCaseComponent } from './manage-case/manage-case.component';
 import { NewCaseComponent } from './new-case/new-case.component';
 import { FinancialStatementComponent } from './financial-statement/financial-statement.component';
 import { LoginRouteGuardService } from './login-route-guard.service';
-import { HedgeAgrementComponent } from './hedge-agrement/hedge-agrement.component'
-import { ViewLoanComponent } from './view-loan/view-loan.component'
+import { HedgeAgrementComponent } from './hedge-agrement/hedge-agrement.component';
+import { ViewLoanComponent } from './view-loan/view-loan.component';
 
 
 const routes: Routes = [
@@ -26,12 +26,10 @@ const routes: Routes = [
   {
     path: 'hedgeAgreement',
     component: HedgeAgrementComponent,
-    // canActivate: [LoginRouteGuardService]
   },
   {
     path: 'admin',
     component: AdministratorComponent,
-    // canActivate: [LoginRouteGuardService]
   },
   {
     path: 'borrower',
@@ -40,32 +38,26 @@ const routes: Routes = [
   {
     path: 'auditor',
     component: AuditorComponent,
-    // canActivate: [LoginRouteGuardService]
   },
   {
     path: 'new-case',
     component: NewCaseComponent,
-    // canActivate: [LoginRouteGuardService]
   },
   {
     path: 'financial-statement',
     component: FinancialStatementComponent,
-    // canActivate: [LoginRouteGuardService]
   },
   {
     path: 'engineer',
     component: EngineerComponent,
-    // canActivate: [LoginRouteGuardService]
   },
   {
     path: 'manage-case',
     component: ManageCaseComponent,
-    // canActivate: [LoginRouteGuardService]
   },
   {
     path: 'lender',
     component: LenderComponent,
-    // canActivate: [LoginRouteGuardService]
   },
   {
     path: 'login',

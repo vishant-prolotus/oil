@@ -42,18 +42,6 @@ module.exports = {
         });
     },
 
-    SaveFinancialRequest: function(bId,aId,rId) {
-        return new Promise(function(resolve,reject) {
-            var collection = global.db.collection('request');
-            collection.insertOne({"Auditor_id":aId,"Borrower_id":bId,"Status":'Pending',"_id":rId}, function(err, response) {
-            if(err){
-                reject(err);
-            }
-            resolve(response);
-            });
-        });
-    },
-
     GetStatements: function(req,res) {
         return new Promise(function(resolve,reject) {
             var collection = global.db.collection('request');
