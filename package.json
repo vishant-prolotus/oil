@@ -1,15 +1,9 @@
 {
-  "name": "balance-transfer",
+  "name": "balance",
   "version": "1.0.0-beta",
-  "description": "A balance-transfer example node program to demonstrate using node.js SDK APIs",
   "scripts": {
     "start": "sudo node app.js && cd my-app && sudo ng build"
   },
-  "keywords": [
-    "fabric-client sample app",
-    "balance-transfer node sample",
-    "v1.0 fabric nodesdk sample"
-  ],
   "engines": {
     "node": ">=6.9.5",
     "npm": ">=3.10.10"
